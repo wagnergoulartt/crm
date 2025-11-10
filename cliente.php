@@ -1,7 +1,7 @@
 <?php
 /**
  * Sistema de Cobrança Bot WhatsApp - Gerenciamento de Clientes
- * CRUD completo de clientes
+ * CRUD completo de clientes - VERSÃO CORRIGIDA
  */
 
 require_once 'config.php';
@@ -135,10 +135,6 @@ $produtos = $stmt->fetchAll();
             margin-bottom: 20px;
         }
         
-        .table {
-            margin-bottom: 0;
-        }
-        
         .btn-sm {
             padding: 5px 10px;
             font-size: 12px;
@@ -155,14 +151,6 @@ $produtos = $stmt->fetchAll();
         
         .btn {
             border-radius: 8px;
-        }
-        
-        .modal-content {
-            border-radius: 15px;
-        }
-        
-        .table-responsive {
-            border-radius: 10px;
         }
     </style>
 </head>
@@ -189,7 +177,7 @@ $produtos = $stmt->fetchAll();
                 <h5><i class="fas fa-plus me-2"></i>Adicionar Novo Cliente</h5>
             </div>
             <div class="card-body">
-                <form method="POST" id="formCliente">
+                <form method="POST">
                     <input type="hidden" name="acao" value="adicionar">
                     
                     <div class="row">
@@ -266,8 +254,8 @@ $produtos = $stmt->fetchAll();
                                         <td><?php echo htmlspecialchars($cliente['whatsapp']); ?></td>
                                         <td><code><?php echo htmlspecialchars($cliente['grupo_id']); ?></code></td>
                                         <td>
-                                            <?php echo htmlspecialchars($cliente['produto_nome']); ?>
-                                            <br><small class="text-muted"><?php echo formatMoney($cliente['produto_valor']); ?></small>
+                                            <?php echo htmlspecialchars($cliente['produto_nome'] ?? 'N/A'); ?>
+                                            <br><small class="text-muted"><?php echo formatMoney($cliente['produto_valor'] ?? 0); ?></small>
                                         </td>
                                         <td>
                                             <?php
@@ -301,204 +289,239 @@ $produtos = $stmt->fetchAll();
         </div>
     </div>
 
-    <!-- Modal de Edição -->
-    <div class="modal fade" id="modalEditar" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-warning">
-                    <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Cliente</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+<!-- Modal de Edição -->
+<div class="modal fade" id="modalEditar" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-warning">
+                <h5 class="modal-title"><i class="fas fa-edit me-2"></i>Editar Cliente</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <form method="POST">
+                <div class="modal-body">
+                    <input type="hidden" name="acao" value="editar">
+                    <input type="hidden" name="id" id="edit_id">
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Nome do Cliente *</label>
+                        <input type="text" name="nome" id="edit_nome" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">WhatsApp *</label>
+                        <input type="text" name="whatsapp" id="edit_whatsapp" class="form-control" required>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label class="form-label">Grupo ID *</label>
+                        <input type="text" name="grupo_id" id="edit_grupo_id" class="form-control" required>
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <label class="form-label">Produto *</label>
+                            <select name="produto_id" id="edit_produto_id" class="form-select" required>
+                                <option value="">Selecione...</option>
+                                <?php foreach ($produtos as $produto): ?>
+                                    <option value="<?php echo $produto['id']; ?>">
+                                        <?php echo $produto['nome']; ?> - <?php echo formatMoney($produto['valor']); ?>
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label">Status *</label>
+                            <select name="status" id="edit_status" class="form-select" required>
+                                <option value="ativo">Ativo</option>
+                                <option value="vencido">Vencido</option>
+                                <option value="suspenso">Suspenso</option>
+                            </select>
+                        </div>
+                    </div>
                 </div>
-                <form method="POST" id="formEditar">
-                    <div class="modal-body">
-                        <input type="hidden" name="acao" value="editar">
-                        <input type="hidden" name="id" id="edit_id">
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Nome do Cliente *</label>
-                            <input type="text" name="nome" id="edit_nome" class="form-control" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">WhatsApp *</label>
-                            <input type="text" name="whatsapp" id="edit_whatsapp" class="form-control" required>
-                        </div>
-                        
-                        <div class="mb-3">
-                            <label class="form-label">Grupo ID *</label>
-                            <input type="text" name="grupo_id" id="edit_grupo_id" class="form-control" required>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <label class="form-label">Produto *</label>
-                                <select name="produto_id" id="edit_produto_id" class="form-select" required>
-                                    <option value="">Selecione...</option>
-                                    <?php foreach ($produtos as $produto): ?>
-                                        <option value="<?php echo $produto['id']; ?>">
-                                            <?php echo $produto['nome']; ?> - <?php echo formatMoney($produto['valor']); ?>
-                                        </option>
-                                    <?php endforeach; ?>
-                                </select>
-                            </div>
-                            <div class="col-md-6">
-                               <label class="form-label">Status *</label>
-                                <select name="status" id="edit_status" class="form-select" required>
-                                    <option value="ativo">Ativo</option>
-                                    <option value="vencido">Vencido</option>
-                                    <option value="suspenso">Suspenso</option>
-                                </select>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-warning">
-                            <i class="fas fa-save me-2"></i>Salvar Alterações
-                        </button>
-                    </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-warning">
+                        <i class="fas fa-save me-2"></i>Salvar Alterações
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+<!-- Modal de Confirmação de Exclusão -->
+<div class="modal fade" id="modalExcluir" tabindex="-1">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header bg-danger text-white">
+                <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Confirmar Exclusão</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p>Tem certeza que deseja excluir o cliente:</p>
+                <p><strong id="nomeExcluir"></strong></p>
+                <div class="alert alert-warning">
+                    <i class="fas fa-exclamation-triangle me-2"></i>
+                    Esta ação não pode ser desfeita!
+                </div>
+            </div>
+            <div class="modal-footer">
+                <form method="POST">
+                    <input type="hidden" name="acao" value="excluir">
+                    <input type="hidden" name="id" id="excluir_id">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="submit" class="btn btn-danger">
+                        <i class="fas fa-trash me-2"></i>Excluir Cliente
+                    </button>
                 </form>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- Modal de Confirmação de Exclusão -->
-    <div class="modal fade" id="modalExcluir" tabindex="-1">
-        <div class="modal-dialog">
-            <div class="modal-content">
-                <div class="modal-header bg-danger text-white">
-                    <h5 class="modal-title"><i class="fas fa-trash me-2"></i>Confirmar Exclusão</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
-                </div>
-                <div class="modal-body">
-                    <p>Tem certeza que deseja excluir o cliente:</p>
-                    <p><strong id="nomeExcluir"></strong></p>
-                    <div class="alert alert-warning">
-                        <i class="fas fa-exclamation-triangle me-2"></i>
-                        Esta ação não pode ser desfeita!
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+
+<script>
+    // Função para editar cliente
+    function editarCliente(cliente) {
+        // Preencher campos do modal com dados do cliente
+        document.getElementById('edit_id').value = cliente.id;
+        document.getElementById('edit_nome').value = cliente.nome;
+        document.getElementById('edit_whatsapp').value = cliente.whatsapp;
+        document.getElementById('edit_grupo_id').value = cliente.grupo_id;
+        document.getElementById('edit_produto_id').value = cliente.produto_id;
+        document.getElementById('edit_status').value = cliente.status;
+        
+        // Mostrar modal de edição
+        const modal = new bootstrap.Modal(document.getElementById('modalEditar'));
+        modal.show();
+    }
+    
+    // Função para excluir cliente
+    function excluirCliente(id, nome) {
+        // Preencher dados no modal de confirmação
+        document.getElementById('excluir_id').value = id;
+        document.getElementById('nomeExcluir').textContent = nome;
+        
+        // Mostrar modal de confirmação
+        const modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
+        modal.show();
+    }
+    
+    // Validação de WhatsApp - apenas números
+    document.querySelector('input[name="whatsapp"]').addEventListener('input', function(e) {
+        // Remove todos os caracteres não numéricos
+        this.value = this.value.replace(/\D/g, '');
+        
+        // Limita a 15 dígitos
+        if (this.value.length > 15) {
+            this.value = this.value.substring(0, 15);
+        }
+    });
+    
+    // Validação de WhatsApp no modal de edição
+    document.getElementById('edit_whatsapp').addEventListener('input', function(e) {
+        this.value = this.value.replace(/\D/g, '');
+        if (this.value.length > 15) {
+            this.value = this.value.substring(0, 15);
+        }
+    });
+    
+    // Validação de Grupo ID - remove caracteres especiais
+    document.querySelector('input[name="grupo_id"]').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');
+    });
+    
+    document.getElementById('edit_grupo_id').addEventListener('input', function(e) {
+        this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');
+    });
+    
+    // Auto-dismissal de alertas após 5 segundos
+    setTimeout(function() {
+        const alerts = document.querySelectorAll('.alert-dismissible');
+        alerts.forEach(function(alert) {
+            const bsAlert = new bootstrap.Alert(alert);
+            bsAlert.close();
+        });
+    }, 5000);
+    
+    // Busca em tempo real na tabela de clientes
+    if (document.querySelectorAll('tbody tr').length > 1) {
+        // Adicionar campo de busca apenas se houver clientes
+        const buscaHTML = `
+            <div class="p-3 border-bottom">
+                <div class="row">
+                    <div class="col-md-6">
+                        <input type="text" id="buscarCliente" class="form-control" 
+                               placeholder="🔍 Buscar por nome, WhatsApp ou Grupo ID...">
                     </div>
-                </div>
-                <div class="modal-footer">
-                    <form method="POST" id="formExcluir">
-                        <input type="hidden" name="acao" value="excluir">
-                        <input type="hidden" name="id" id="excluir_id">
-                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
-                        <button type="submit" class="btn btn-danger">
-                            <i class="fas fa-trash me-2"></i>Excluir Cliente
-                        </button>
-                    </form>
                 </div>
             </div>
-        </div>
-    </div>
-
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    
-    <script>
-        // Função para editar cliente
-        function editarCliente(cliente) {
-            document.getElementById('edit_id').value = cliente.id;
-            document.getElementById('edit_nome').value = cliente.nome;
-            document.getElementById('edit_whatsapp').value = cliente.whatsapp;
-            document.getElementById('edit_grupo_id').value = cliente.grupo_id;
-            document.getElementById('edit_produto_id').value = cliente.produto_id;
-            document.getElementById('edit_status').value = cliente.status;
+        `;
+        
+        const tableContainer = document.querySelector('.table-responsive');
+        tableContainer.insertAdjacentHTML('beforebegin', buscaHTML);
+        
+        // Implementar a funcionalidade de busca
+        document.getElementById('buscarCliente').addEventListener('input', function(e) {
+            const termo = e.target.value.toLowerCase();
+            const linhas = document.querySelectorAll('tbody tr');
             
-            // Mostrar modal
-            const modal = new bootstrap.Modal(document.getElementById('modalEditar'));
-            modal.show();
-        }
-        
-        // Função para excluir cliente
-        function excluirCliente(id, nome) {
-            document.getElementById('excluir_id').value = id;
-            document.getElementById('nomeExcluir').textContent = nome;
-            
-            // Mostrar modal
-            const modal = new bootstrap.Modal(document.getElementById('modalExcluir'));
-            modal.show();
-        }
-        
-        // Validação de WhatsApp
-        document.querySelector('input[name="whatsapp"]').addEventListener('input', function(e) {
-            // Remove tudo que não é número
-            this.value = this.value.replace(/\D/g, '');
-            
-            // Limita a 15 dígitos
-            if (this.value.length > 15) {
-                this.value = this.value.substring(0, 15);
-            }
-        });
-        
-        // Validação de WhatsApp no modal de edição
-        document.getElementById('edit_whatsapp').addEventListener('input', function(e) {
-            this.value = this.value.replace(/\D/g, '');
-            if (this.value.length > 15) {
-                this.value = this.value.substring(0, 15);
-            }
-        });
-        
-        // Validação de Grupo ID (apenas letras, números e alguns símbolos)
-        document.querySelector('input[name="grupo_id"]').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');
-        });
-        
-        document.getElementById('edit_grupo_id').addEventListener('input', function(e) {
-            this.value = this.value.replace(/[^a-zA-Z0-9@._-]/g, '');
-        });
-        
-        // Auto-dismissal de alertas
-        setTimeout(function() {
-            const alerts = document.querySelectorAll('.alert-dismissible');
-            alerts.forEach(function(alert) {
-                const bsAlert = new bootstrap.Alert(alert);
-                bsAlert.close();
-            });
-        }, 5000);
-        
-        // Confirmação antes de excluir
-        document.getElementById('formExcluir').addEventListener('submit', function(e) {
-            if (!confirm('Tem CERTEZA absoluta que deseja excluir este cliente?')) {
-                e.preventDefault();
-            }
-        });
-        
-        // Busca simples na tabela
-        function adicionarBusca() {
-            const buscaHtml = `
-                <div class="row mb-3">
-                    <div class="col-md-6">
-                        <input type="text" id="buscarCliente" class="form-control" placeholder="🔍 Buscar por nome, WhatsApp ou Grupo ID...">
-                    </div>
-                </div>
-            `;
-            
-            const cardBody = document.querySelector('.card:last-child .card-body');
-            cardBody.insertAdjacentHTML('afterbegin', buscaHtml);
-            
-            // Implementar busca
-            document.getElementById('buscarCliente').addEventListener('input', function(e) {
-                const termo = e.target.value.toLowerCase();
-                const linhas = document.querySelectorAll('tbody tr');
-                
-                linhas.forEach(function(linha) {
-                    if (linha.querySelector('td')) { // Não é a linha de "nenhum cliente"
-                        const texto = linha.textContent.toLowerCase();
-                        if (texto.includes(termo)) {
-                            linha.style.display = '';
-                        } else {
-                            linha.style.display = 'none';
-                        }
+            linhas.forEach(function(linha) {
+                if (linha.querySelector('td') && !linha.querySelector('td[colspan]')) {
+                    // É uma linha de dados (não é a linha de "nenhum cliente")
+                    const texto = linha.textContent.toLowerCase();
+                    if (texto.includes(termo)) {
+                        linha.style.display = '';
+                    } else {
+                        linha.style.display = 'none';
                     }
-                });
+                }
+            });
+        });
+    }
+    
+    // Confirmação adicional antes de excluir
+    document.querySelectorAll('form[method="POST"]').forEach(function(form) {
+        if (form.querySelector('input[value="excluir"]')) {
+            form.addEventListener('submit', function(e) {
+                if (!confirm('Tem CERTEZA absoluta que deseja excluir este cliente?\n\nEsta ação irá remover também todos os pagamentos e lembretes relacionados!')) {
+                    e.preventDefault();
+                }
             });
         }
+    });
+    
+    // Validação do formulário antes de enviar
+    document.querySelector('form[method="POST"]').addEventListener('submit', function(e) {
+        const acao = this.querySelector('input[name="acao"]').value;
         
-        // Adicionar busca se houver clientes
-        <?php if (!empty($clientes)): ?>
-        adicionarBusca();
-        <?php endif; ?>
-        
-    </script>
+        if (acao === 'adicionar' || acao === 'editar') {
+            const nome = this.querySelector('input[name="nome"]').value.trim();
+            const whatsapp = this.querySelector('input[name="whatsapp"]').value.trim();
+            const grupo_id = this.querySelector('input[name="grupo_id"]').value.trim();
+            const produto_id = this.querySelector('select[name="produto_id"]').value;
+            
+            if (!nome || !whatsapp || !grupo_id || !produto_id) {
+                alert('Por favor, preencha todos os campos obrigatórios!');
+                e.preventDefault();
+                return;
+            }
+            
+            if (whatsapp.length < 10 || whatsapp.length > 15) {
+                alert('WhatsApp deve ter entre 10 e 15 dígitos!');
+                e.preventDefault();
+                return;
+            }
+        }
+    });
+    
+    // Foco automático no primeiro campo ao abrir modal
+    document.getElementById('modalEditar').addEventListener('shown.bs.modal', function() {
+        document.getElementById('edit_nome').focus();
+    });
+    
+</script>
 </body>
 </html>
