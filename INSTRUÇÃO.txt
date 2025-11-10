@@ -1,0 +1,108 @@
+/sistema_cobranca/
+│
+├── config.php
+│   → Configuração global:
+│       - Timezone fixo: 'America/Sao_Paulo'.
+│       - Conexão com o banco de dados (MySQL).
+│       - Token de acesso do Mercado Pago (MP_ACCESS_TOKEN).
+│       - Valor padrão da multa (%) e dias de carência (3 dias).
+│       - Token interno de segurança para integração com o bot.
+│       - URLs absolutas configuráveis (BASE_URL).
+│
+├── database.sql
+│   → Script de criação das tabelas:
+│       - admin: login do administrador (senha em texto simples)
+│       - produtos: planos de assinatura do bot
+│       - clientes: dados dos grupos/clientes
+│       - pagamentos: cobranças geradas
+│       - lembretes: sistema de avisos (3 níveis + ação)
+│
+├── login.php
+│   → Tela de login minimalista:
+│       - Validação com tabela `admin` (usuário/senha texto simples).
+│       - Cria sessão e redireciona para o `dashboard.php`.
+│       - Layout básico sem decorações.
+│
+├── logout.php
+│   → Encerra sessão e redireciona para o login.
+│
+├── dashboard.php
+│   → Painel único com menu horizontal simples:
+│       - MENU BÁSICO:
+│           [Dashboard] [Clientes] [Produtos] [Pagamentos] [Sair]
+│       - 3 Cards funcionais atualizados:
+│           📊 150 Clientes (total de clientes cadastrados)
+│           💰 120 Faturas | 5 Vencidas (faturas do mês | faturas vencidas específicas)
+│           💵 R$ 4.750 (receita recebida do mês atual)
+│       - Busca rápida: [______] [Buscar]
+│       - ÁREA DE CONTEÚDO que muda conforme menu clicado.
+│       - Cards sempre visíveis no topo da página.
+│
+├── cliente.php
+│   → CRUD básico de clientes (SEM header/menu):
+│       - Carregado dentro do dashboard via JavaScript.
+│       - Tabela simples: Nome | WhatsApp | Grupo ID | Produto | Status | Ações
+│       - Formulário inline para adicionar/editar.
+│       - Botões: [Salvar] [Editar] [Excluir]
+│       - Ao cadastrar: 
+│           1️⃣ Vencimento para 30 dias à frente
+│           2️⃣ Gera cobrança automaticamente via mercadopago.php
+│           3️⃣ Salva na tabela pagamentos
+│
+├── produto.php
+│   → CRUD básico de produtos (SEM header/menu):
+│       - Carregado dentro do dashboard via JavaScript.
+│       - Tabela: Nome | Valor | Multa % | Status | Ações
+│       - Formulário simples para criar/editar.
+│       - Campos mínimos: nome, valor, multa_percentual.
+│
+├── pagamentos.php
+│   → Lista simples de cobranças (SEM header/menu):
+│       - Carregado dentro do dashboard via JavaScript.
+│       - Tabela: Cliente | Produto | Valor Original | Valor c/ Multa | Vencimento | Status | Link MP
+│       - Filtro básico: [Todos] [Pagos] [Pendentes] [Vencidos]
+│       - Ações: [Ver Link] [Marcar Pago] [Excluir]
+│       - Cálculo de multa em tempo real para vencidos.
+│
+├── mercadopago.php
+│   → Processamento MP (arquivo de backend):
+│       - Cria preferência de pagamento.
+│       - Retorna link e salva no banco.
+│       - URLs absolutas para webhook/retorno.
+│       - Calcula multa se pagamento atrasado.
+│
+├── webhook_mercadopago.php
+│   → Endpoint MP (arquivo de API):
+│       - Recebe notificações do Mercado Pago.
+│       - Atualiza status: pago/pendente/cancelado.
+│       - Quando pago:
+│           ✅ Status cliente = "ativo"
+│           ✅ Gera nova cobrança (+30 dias)
+│           ✅ Remove lembretes pendentes
+│       - Quando vencido: aplica multa e status = "vencido".
+│
+├── cron_verificacao.php
+│   → Script diário (execução às 10h):
+│       - Verifica cobranças vencidas.
+│       - Aplica multa: valor + (valor * multa% * dias_atraso).
+│       - Atualiza status cliente para "vencido".
+│       - Gera lembretes com carência de 3 dias:
+│           📅 Dia +1: primeiro_aviso (mensagem educada)
+│           📅 Dia +2: segundo_aviso (mensagem urgente)
+│           📅 Dia +3: ultimo_aviso (última chance)
+│           📅 Dia +4: sair_grupo (bot sai do grupo)
+│
+├── lembrete_auto.php
+│   → API JSON para bot:
+│       - Retorna lembretes pendentes para o bot processar.
+│       - Tipos de ação: primeiro_aviso, segundo_aviso, ultimo_aviso, sair_grupo.
+│       - Dados retornados: nome, whatsapp, grupo_id, valor, link_pagamento, tipo_acao.
+│       - Acesso: GET /lembrete_auto.php?token=CHAVE_SEGURA
+│       - Bot consulta periodicamente esta URL.
+│
+└── atualizar_status.php
+    → API para marcar lembretes enviados:
+        - Recebe POST com ID do lembrete.
+        - Marca lembrete como "enviado" no banco.
+        - Bot chama após enviar mensagem ou executar ação.
+        - Autenticação via token interno.
