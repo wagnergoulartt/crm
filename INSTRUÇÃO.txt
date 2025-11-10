@@ -1,4 +1,18 @@
+"Olá! Tenho um projeto de sistema de cobrança para bot WhatsApp. A estrutura está definida conforme abaixo. Cada página PHP deve ter seu próprio CSS e JS embutido (não arquivos separados). Preciso implementar os códigos seguindo esta arquitetura. Pode me ajudar começando pelo arquivo que eu solicitar?"
+
+
+
+Estrutura do Projeto (CSS/JS em cada página)
+
 /sistema_cobranca/
+│
+├── database.sql
+│   → Script de criação das tabelas:
+│       - admin: login do administrador (senha em texto simples)
+│       - produtos: planos de assinatura do bot
+│       - clientes: dados dos grupos/clientes
+│       - pagamentos: cobranças geradas
+│       - lembretes: sistema de avisos (3 níveis + ação)
 │
 ├── config.php
 │   → Configuração global:
@@ -9,100 +23,260 @@
 │       - Token interno de segurança para integração com o bot.
 │       - URLs absolutas configuráveis (BASE_URL).
 │
-├── database.sql
-│   → Script de criação das tabelas:
-│       - admin: login do administrador (senha em texto simples)
-│       - produtos: planos de assinatura do bot
-│       - clientes: dados dos grupos/clientes
-│       - pagamentos: cobranças geradas
-│       - lembretes: sistema de avisos (3 níveis + ação)
-│
 ├── login.php
-│   → Tela de login minimalista:
+│   → Tela de login completa:
+│       - HTML + CSS + JS embutidos na própria página.
 │       - Validação com tabela `admin` (usuário/senha texto simples).
-│       - Cria sessão e redireciona para o `dashboard.php`.
-│       - Layout básico sem decorações.
+│       - CSS: Bootstrap via CDN + estilos customizados inline.
+│       - JS: Validação de formulário inline.
+│       - Layout funcional e responsivo.
 │
 ├── logout.php
-│   → Encerra sessão e redireciona para o login.
+│   → Script simples de logout (sem interface).
 │
 ├── dashboard.php
-│   → Painel único com menu horizontal simples:
-│       - MENU BÁSICO:
-│           [Dashboard] [Clientes] [Produtos] [Pagamentos] [Sair]
-│       - 3 Cards funcionais atualizados:
-│           📊 150 Clientes (total de clientes cadastrados)
-│           💰 120 Faturas | 5 Vencidas (faturas do mês | faturas vencidas específicas)
-│           💵 R$ 4.750 (receita recebida do mês atual)
-│       - Busca rápida: [______] [Buscar]
-│       - ÁREA DE CONTEÚDO que muda conforme menu clicado.
-│       - Cards sempre visíveis no topo da página.
+│   → Painel principal completo:
+│       - HTML + CSS + JS embutidos na própria página.
+│       - CSS: Bootstrap + estilos para cards e navegação.
+│       - JS: Navegação SPA, carregamento de conteúdo, busca.
+│       - MENU HORIZONTAL: [Dashboard] [Clientes] [Produtos] [Pagamentos] [Sair]
+│       - 3 Cards: 📊 Clientes | 💰 Faturas|Vencidas | 💵 Receita
+│       - Área de conteúdo dinâmica para carregar outras páginas.
 │
 ├── cliente.php
-│   → CRUD básico de clientes (SEM header/menu):
-│       - Carregado dentro do dashboard via JavaScript.
-│       - Tabela simples: Nome | WhatsApp | Grupo ID | Produto | Status | Ações
-│       - Formulário inline para adicionar/editar.
-│       - Botões: [Salvar] [Editar] [Excluir]
-│       - Ao cadastrar: 
-│           1️⃣ Vencimento para 30 dias à frente
-│           2️⃣ Gera cobrança automaticamente via mercadopago.php
-│           3️⃣ Salva na tabela pagamentos
+│   → CRUD completo de clientes:
+│       - HTML + CSS + JS embutidos na própria página.
+│       - CSS: Estilos para tabela, formulários e botões.
+│       - JS: CRUD funcionalidades, validação, AJAX.
+│       - Funciona standalone OU carregado no dashboard.
+│       - Tabela: Nome | WhatsApp | Grupo ID | Produto | Status | Ações
+│       - Formulários inline para adicionar/editar.
+│       - Auto-gera cobrança ao cadastrar cliente.
 │
 ├── produto.php
-│   → CRUD básico de produtos (SEM header/menu):
-│       - Carregado dentro do dashboard via JavaScript.
+│   → CRUD completo de produtos:
+│       - HTML + CSS + JS embutidos na própria página.
+│       - CSS: Estilos para tabela e formulários.
+│       - JS: CRUD funcionalidades, validação.
+│       - Funciona standalone OU carregado no dashboard.
 │       - Tabela: Nome | Valor | Multa % | Status | Ações
-│       - Formulário simples para criar/editar.
-│       - Campos mínimos: nome, valor, multa_percentual.
+│       - Campos: nome, valor, multa_percentual, descrição.
 │
 ├── pagamentos.php
-│   → Lista simples de cobranças (SEM header/menu):
-│       - Carregado dentro do dashboard via JavaScript.
-│       - Tabela: Cliente | Produto | Valor Original | Valor c/ Multa | Vencimento | Status | Link MP
-│       - Filtro básico: [Todos] [Pagos] [Pendentes] [Vencidos]
+│   → Lista completa de cobranças:
+│       - HTML + CSS + JS embutidos na própria página.
+│       - CSS: Estilos para tabela, filtros e status.
+│       - JS: Filtros dinâmicos, ações, cálculo de multas.
+│       - Funciona standalone OU carregado no dashboard.
+│       - Tabela: Cliente | Produto | Valor | Multa | Vencimento | Status | Link
+│       - Filtros: [Todos] [Pagos] [Pendentes] [Vencidos]
 │       - Ações: [Ver Link] [Marcar Pago] [Excluir]
-│       - Cálculo de multa em tempo real para vencidos.
 │
 ├── mercadopago.php
-│   → Processamento MP (arquivo de backend):
+│   → Processamento MP (backend sem interface):
 │       - Cria preferência de pagamento.
 │       - Retorna link e salva no banco.
 │       - URLs absolutas para webhook/retorno.
-│       - Calcula multa se pagamento atrasado.
+│       - Calcula multa se atrasado.
 │
 ├── webhook_mercadopago.php
-│   → Endpoint MP (arquivo de API):
+│   → Endpoint MP (API sem interface):
 │       - Recebe notificações do Mercado Pago.
 │       - Atualiza status: pago/pendente/cancelado.
-│       - Quando pago:
-│           ✅ Status cliente = "ativo"
-│           ✅ Gera nova cobrança (+30 dias)
-│           ✅ Remove lembretes pendentes
-│       - Quando vencido: aplica multa e status = "vencido".
+│       - Renovação automática de cobranças.
+│       - Remove lembretes quando pago.
 │
 ├── cron_verificacao.php
-│   → Script diário (execução às 10h):
-│       - Verifica cobranças vencidas.
-│       - Aplica multa: valor + (valor * multa% * dias_atraso).
-│       - Atualiza status cliente para "vencido".
-│       - Gera lembretes com carência de 3 dias:
-│           📅 Dia +1: primeiro_aviso (mensagem educada)
-│           📅 Dia +2: segundo_aviso (mensagem urgente)
-│           📅 Dia +3: ultimo_aviso (última chance)
-│           📅 Dia +4: sair_grupo (bot sai do grupo)
+│   → Script diário (processamento sem interface):
+│       - Execução às 10h da manhã.
+│       - Verifica vencimentos e aplica multas.
+│       - Gera lembretes graduais (carência 3 dias).
 │
 ├── lembrete_auto.php
-│   → API JSON para bot:
-│       - Retorna lembretes pendentes para o bot processar.
-│       - Tipos de ação: primeiro_aviso, segundo_aviso, ultimo_aviso, sair_grupo.
-│       - Dados retornados: nome, whatsapp, grupo_id, valor, link_pagamento, tipo_acao.
-│       - Acesso: GET /lembrete_auto.php?token=CHAVE_SEGURA
-│       - Bot consulta periodicamente esta URL.
+│   → API JSON para bot (endpoint sem interface):
+│       - Retorna lembretes pendentes em JSON.
+│       - Tipos: primeiro_aviso, segundo_aviso, ultimo_aviso, sair_grupo.
+│       - Acesso via token: GET /lembrete_auto.php?token=XXX
 │
 └── atualizar_status.php
-    → API para marcar lembretes enviados:
+    → API para marcar enviados (endpoint sem interface):
         - Recebe POST com ID do lembrete.
-        - Marca lembrete como "enviado" no banco.
-        - Bot chama após enviar mensagem ou executar ação.
-        - Autenticação via token interno.
+        - Marca como "enviado" no banco.
+        - Autenticação via token.
+
+
+🎨 Distribuição de CSS/JS por Página
+✅ Páginas COM interface (HTML + CSS + JS próprios):
+login.php:
+CSS: Formulário centralizado, campos, botões
+JS: Validação de campos, submit
+dashboard.php:
+CSS: Layout, menu horizontal, cards, área de conteúdo
+JS: Navegação SPA, carregamento via fetch(), atualização de cards
+cliente.php:
+CSS: Tabela responsiva, formulários inline, botões de ação
+JS: CRUD completo, validação, modal de edição, busca
+produto.php:
+CSS: Tabela simples, formulários, status ativo/inativo
+JS: CRUD básico, validação de valores
+pagamentos.php:
+CSS: Tabela com cores por status, filtros, badges
+JS: Filtros dinâmicos, cálculo de multa, ações
+❌ Arquivos SEM interface (só processamento):
+mercadopago.php
+webhook_mercadopago.php
+cron_verificacao.php
+lembrete_auto.php
+atualizar_status.php
+🔧 Vantagens desta Estrutura:
+Cada página é independente:
+✅ CSS/JS específico para cada funcionalidade
+✅ Fácil de encontrar e editar estilos
+✅ Não há conflitos entre páginas
+✅ Carregamento otimizado (só o necessário)
+Flexibilidade:
+✅ Páginas funcionam standalone (acesso direto)
+✅ Páginas funcionam no dashboard (carregadas via AJAX)
+✅ CSS/JS está onde você precisa mexer
+✅ Manutenção simplificada
+Organização clara:
+✅ Interface = HTML + CSS + JS na própria página
+✅ Backend = PHP puro sem interface
+✅ APIs = Endpoints limpos sem visual
+Agora cada página tem seu próprio CSS e JS embutido, facilitando muito a manutenção e personalização! 🚀
+
+
+
+
+
+
+-- Tabela de administradores (senha em texto simples)
+CREATE TABLE admin (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    usuario VARCHAR(50) NOT NULL UNIQUE,
+    senha VARCHAR(100) NOT NULL,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de produtos/planos do bot
+CREATE TABLE produtos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    valor DECIMAL(10,2) NOT NULL,
+    multa_percentual DECIMAL(5,2) DEFAULT 2.00,
+    descricao TEXT,
+    ativo BOOLEAN DEFAULT 1,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP
+);
+
+-- Tabela de clientes (grupos que alugam o bot)
+CREATE TABLE clientes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    nome VARCHAR(100) NOT NULL,
+    whatsapp VARCHAR(20) NOT NULL,
+    grupo_id VARCHAR(100) NOT NULL UNIQUE,
+    produto_id INT NOT NULL,
+    status ENUM('ativo', 'vencido', 'suspenso') DEFAULT 'ativo',
+    data_cadastro TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    proximo_vencimento DATE,
+    FOREIGN KEY (produto_id) REFERENCES produtos(id) ON DELETE CASCADE
+);
+
+-- Tabela de pagamentos/cobranças
+CREATE TABLE pagamentos (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente_id INT NOT NULL,
+    valor_original DECIMAL(10,2) NOT NULL,
+    valor_corrigido DECIMAL(10,2) NOT NULL,
+    data_vencimento DATE NOT NULL,
+    data_pagamento DATETIME NULL,
+    status ENUM('pendente', 'pago', 'cancelado') DEFAULT 'pendente',
+    link_pagamento TEXT,
+    referencia_mp VARCHAR(100),
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE
+);
+
+-- Tabela de lembretes (sistema de carência de 3 dias)
+CREATE TABLE lembretes (
+    id INT PRIMARY KEY AUTO_INCREMENT,
+    cliente_id INT NOT NULL,
+    pagamento_id INT NOT NULL,
+    tipo ENUM('primeiro_aviso', 'segundo_aviso', 'ultimo_aviso', 'sair_grupo') NOT NULL,
+    enviado BOOLEAN DEFAULT 0,
+    data_criacao TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    data_envio DATETIME NULL,
+    FOREIGN KEY (cliente_id) REFERENCES clientes(id) ON DELETE CASCADE,
+    FOREIGN KEY (pagamento_id) REFERENCES pagamentos(id) ON DELETE CASCADE
+);
+
+-- Inserir admin padrão para teste
+INSERT INTO admin (usuario, senha) VALUES ('admin', '123456');
+
+-- Inserir produtos exemplo
+INSERT INTO produtos (nome, valor, multa_percentual, descricao) VALUES 
+('Plano Básico', 30.00, 2.00, 'Bot básico com comandos essenciais'),
+('Plano Premium', 50.00, 2.50, 'Bot completo com todos os recursos'),
+('Plano VIP', 80.00, 3.00, 'Bot premium + suporte prioritário');
+
+-- Inserir alguns clientes de exemplo (usando IDs reais do seu bot)
+INSERT INTO clientes (nome, whatsapp, grupo_id, produto_id, proximo_vencimento) VALUES 
+('João Silva', '5511999999999', '120363402366122273', 2, DATE_ADD(NOW(), INTERVAL 30 DAY)),
+('Maria Santos', '5511888888888', '120363040997517301', 1, DATE_ADD(NOW(), INTERVAL 30 DAY)),
+('Pedro Costa', '5511777777777', '120363258118685954', 3, DATE_ADD(NOW(), INTERVAL 30 DAY));
+
+-- Inserir pagamentos exemplo
+INSERT INTO pagamentos (cliente_id, valor_original, valor_corrigido, data_vencimento, status) VALUES 
+(1, 50.00, 50.00, DATE_ADD(NOW(), INTERVAL 30 DAY), 'pendente'),
+(2, 30.00, 30.00, DATE_ADD(NOW(), INTERVAL 30 DAY), 'pendente'),
+(3, 80.00, 80.00, DATE_ADD(NOW(), INTERVAL 30 DAY), 'pendente');
+
+🗂️ Estrutura das Tabelas:
+
+admin
+id: Chave primária
+usuario: Nome de usuário único
+senha: Senha em texto simples
+data_criacao: Data de criação automática
+
+produtos
+id: Chave primária
+nome: Nome do plano (ex: "Plano Premium")
+valor: Valor mensal em decimal
+multa_percentual: % de multa por dia de atraso
+descricao: Descrição do plano
+ativo: Se o produto está ativo (1) ou não (0)
+
+clientes
+id: Chave primária
+nome: Nome do cliente
+whatsapp: Número do WhatsApp
+grupo_id: ID do grupo (ÚNICO - um bot por grupo)
+produto_id: Referência ao produto contratado
+status: ativo, vencido ou suspenso
+proximo_vencimento: Data do próximo vencimento
+
+pagamentos
+id: Chave primária
+cliente_id: Referência ao cliente
+valor_original: Valor sem multa
+valor_corrigido: Valor com multa aplicada
+data_vencimento: Quando vence o pagamento
+data_pagamento: Quando foi pago (NULL se pendente)
+status: pendente, pago ou cancelado
+link_pagamento: Link do Mercado Pago
+
+lembretes
+id: Chave primária
+cliente_id: Referência ao cliente
+pagamento_id: Referência ao pagamento
+tipo: Tipo do lembrete (carência de 3 dias)
+enviado: Se o lembrete foi processado pelo bot
+data_envio: Quando foi enviado
+
+📊 Dados de Teste Inclusos:
+Admin: admin / 123456
+3 Produtos: Básico (R30), Premium (R50), VIP (R$80)
+3 Clientes com IDs reais do seu bot
+3 Pagamentos pendentes para testar
+Execute este script no seu banco existente para criar toda a estrutura! 🚀
