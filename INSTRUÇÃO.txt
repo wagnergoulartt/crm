@@ -279,4 +279,12 @@ Admin: admin / 123456
 3 Produtos: Básico (R30), Premium (R50), VIP (R$80)
 3 Clientes com IDs reais do seu bot
 3 Pagamentos pendentes para testar
+
+
+
+INFORMAÇÕES DO BANCO DE DADOS:
+
+BANCO DE DADOS: u529068110_crm
+USUARIO: u529068110_crm
+SENHA:@Erick91492832
 Execute este script no seu banco existente para criar toda a estrutura! 🚀
